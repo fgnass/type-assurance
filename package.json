@@ -8,6 +8,9 @@
     "type guard"
   ],
   "main": "./lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "build": "rm -rf lib && tsc",
     "test": "tap lib/test/index.js",
