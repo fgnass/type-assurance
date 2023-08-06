@@ -1,5 +1,7 @@
 # 🛡️ type-assurance
 
+![npm bundle size](https://img.shields.io/bundlephobia/min/type-assurance)
+
 Super lightweight (< 1KB) TypeScript library to perform type checks at runtime.
 
 - [x] Tired of writing long expressions to narrow your types?
