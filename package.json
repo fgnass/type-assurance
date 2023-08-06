@@ -1,0 +1,25 @@
+{
+  "name": "type-assurance",
+  "version": "1.0.0",
+  "description": "Lightweight type guards and assertions",
+  "keywords": [
+    "typescript",
+    "narrowing",
+    "type guard"
+  ],
+  "main": "./lib/index.js",
+  "scripts": {
+    "build": "rm -rf lib && tsc",
+    "test": "tap lib/test/index.js",
+    "pretest": "npm run build",
+    "prepublish": "npm run build"
+  },
+  "author": "Felix Gnass <fgnass@gmail.com>",
+  "repository": "fgnass/type-assurance",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/tap": "^15.0.8",
+    "tap": "^16.3.8",
+    "typescript": "^5.1.6"
+  }
+}
