@@ -2,11 +2,11 @@
 
 ![npm bundle size](https://img.shields.io/bundlephobia/min/type-assurance)
 
-Super lightweight (< 1KB) TypeScript library to perform type checks at runtime.
+Super [lightweight](https://bundlephobia.com/package/type-assurance) TypeScript library to perform type checks at runtime.
 
-- [x] Tired of writing long expressions to narrow your types?
-- [x] You don't want to blow up your bundle size by adding some huge validation library?
-- [x] Your type checks should be easy to understand by anyone reading your code?
+- ✅ Tired of writing long expressions to narrow your types?
+- ✅ You don't want to blow up your bundle size by adding some huge validation library?
+- ✅ Your type checks should be easy to understand by anyone reading your code?
 
 If you've ticked any of the boxes above, take a look at the following example to see what `type-assurance` has to offer:
 
@@ -32,6 +32,16 @@ if (
   // compiler now knows the correct types...
 }
 ```
+
+## Installation
+
+You can install the package from [npm](npmjs.com/package/type-assurance):
+
+```
+npm install type-assurance
+```
+
+🦕 The package is also published under https://deno.land/x/typeassurance for use with Deno.
 
 ## Usage
 
