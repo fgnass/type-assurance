@@ -16,7 +16,7 @@
     "build": "rm -rf lib && tsc",
     "test": "tap lib/test/index.js",
     "pretest": "npm run build",
-    "prepublish": "npm run build"
+    "prepublish": "npm test"
   },
   "author": "Felix Gnass <fgnass@gmail.com>",
   "repository": "fgnass/type-assurance",

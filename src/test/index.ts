@@ -35,7 +35,15 @@ tap.test("object", async (t) => {
 });
 
 tap.test("null", async (t) => {
-  t.notOk(is(null, { name: String }));
+  const v: unknown = null;
+  t.ok(is(v, null));
+  t.notOk(is(v, { name: String }));
+});
+
+tap.test("undefined", async (t) => {
+  const v: unknown = undefined;
+  t.ok(is(v, undefined));
+  t.notOk(is(v, null));
 });
 
 tap.test("nested object", async (t) => {
@@ -106,8 +114,8 @@ tap.test("unsupported schema", async (t) => {
 });
 
 tap.test("function", async (t) => {
-  t.ok(is("foo", (v) => typeof v === "string"));
-  t.notOk(is("foo", (v) => typeof v === "number"));
+  t.ok(is("foo", (v: unknown) => typeof v === "string"));
+  t.notOk(is("foo", (v: unknown) => typeof v === "number"));
 });
 
 tap.test("union", async (t) => {
@@ -129,6 +137,6 @@ tap.test("assert", async (t) => {
   const obj: unknown = { foo: "foo" };
   assert(obj, { foo: String });
   t.throws(() => {
-    assert(obj, { foo: String });
+    assert(obj, { foo: Number });
   }, TypeError);
 });
