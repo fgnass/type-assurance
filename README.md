@@ -192,6 +192,39 @@ assert(task, { status: union("pending", "active", "done") });
 assert(person, { age: union(Number, null))});
 ```
 
+### Optional properties
+
+You can use the `optional` helper for properties that aren't required:
+
+```ts
+import { assert, optional } from "type-assurance";
+
+const person = { name: "Felix" };
+
+assert(person, {
+  name: String,
+  address: optional(String),
+});
+```
+
+> **NOTE**: `optional(schema)` is short for `union(schema, undefined)`;
+
+### Infer the type from a schema
+
+You can convert a runtime schema into a static type:
+
+```ts
+import { TypeFromSchema } from "type-assurance";
+
+const PersonSchema = {
+  name: String;
+  age: Number;
+}
+
+type Person = TypeFromSchema<typeof PersonSchema>;
+
+```
+
 # License
 
 MIT
