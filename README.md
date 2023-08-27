@@ -207,7 +207,8 @@ assert(person, {
 });
 ```
 
-> **NOTE**: `optional(schema)` is short for `union(schema, undefined)`;
+> **Note**
+> The `optional(schema)` helper is short for `union(schema, undefined)`;
 
 ### Infer the type from a schema
 
