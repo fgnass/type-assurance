@@ -148,6 +148,16 @@ tap.test("literal", async (t) => {
   t.notOk(is(a, "bar"));
 });
 
+tap.test("object with literal", async (t) => {
+  const obj: unknown = { name: "aaa", count: 1 };
+  const matches = is(obj, { name: "aaa", count: Number });
+  if (matches) {
+    obj.name.charAt(0);
+    obj.count.toFixed(2);
+  }
+  t.ok(matches);
+});
+
 tap.test("assert", async (t) => {
   const obj: unknown = { foo: "foo" };
   assert(obj, { foo: String });

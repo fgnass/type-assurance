@@ -21,7 +21,7 @@ export type TypeFromSchema<T> = T extends StringConstructor
   : T extends ReadonlyArray<Schema>
   ? { [P in keyof T]: TypeFromSchema<T[P]> }
   : T extends { [key: string]: Schema }
-  ? { [P in keyof T]: TypeFromSchema<T[P]> }
+  ? { -readonly [P in keyof T]: TypeFromSchema<T[P]> }
   : T extends new (...args: any) => infer R
   ? R
   : T extends (v: unknown) => v is infer R
@@ -32,7 +32,7 @@ function isConstructor(fn: unknown): fn is new (...args: any) => any {
   return typeof fn === "function" && fn.prototype?.constructor === fn;
 }
 
-export function is<T extends Schema>(
+export function is<const T extends Schema>(
   value: unknown,
   schema: T
 ): value is TypeFromSchema<T> {
