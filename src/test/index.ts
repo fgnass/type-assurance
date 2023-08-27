@@ -97,6 +97,12 @@ tap.test("not an array", async (t) => {
   t.notOk(matches);
 });
 
+tap.test("mixed array", async (t) => {
+  const a: unknown = ["a", 1, true];
+  const matches = is(a, []);
+  t.ok(matches);
+});
+
 tap.test("tuple", async (t) => {
   const a: unknown = ["A", 2, new Date()];
   const matches = is(a, [String, Number, Date] as const);

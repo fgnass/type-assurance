@@ -41,6 +41,7 @@ export function is<T extends Schema>(
   if (schema === Boolean) return typeof value === "boolean";
   if (Array.isArray(schema)) {
     if (!Array.isArray(value)) return false;
+    if (!schema.length) return true;
     if (schema.length > 1) {
       // tuple
       return (
