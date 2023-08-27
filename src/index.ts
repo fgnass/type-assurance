@@ -72,6 +72,10 @@ export function union(...schemas: Schema[]) {
   return (v: unknown) => schemas.some((schema) => is(v, schema));
 }
 
+export function optional(schema: Schema) {
+  return union(schema, undefined);
+}
+
 export function assert<T extends Schema>(
   value: unknown,
   schema: T

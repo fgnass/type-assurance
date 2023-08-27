@@ -1,5 +1,5 @@
 import tap from "tap";
-import { assert, is, union } from "../index.js";
+import { assert, is, optional, union } from "../index.js";
 
 tap.test("string", async (t) => {
   const s: unknown = "s";
@@ -130,6 +130,15 @@ tap.test("union", async (t) => {
   t.ok(is(a, { foo: union(String, Number) }));
   t.ok(is(b, { foo: union(String, Number) }));
   t.notOk(is(a, { foo: union(Boolean, Number) }));
+});
+
+tap.test("optional", async (t) => {
+  const a: unknown = { foo: "foo" };
+  const b: unknown = { foo: undefined };
+  const c: unknown = {};
+  t.ok(is(a, { foo: optional(String) }));
+  t.ok(is(b, { foo: optional(String) }));
+  t.ok(is(c, { foo: optional(String) }));
 });
 
 tap.test("literal", async (t) => {
