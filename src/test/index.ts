@@ -126,9 +126,28 @@ tap.test("unsupported schema", async (t) => {
   t.notOk(matches);
 });
 
-tap.test("function", async (t) => {
+tap.test("arrow function", async (t) => {
   t.ok(is("foo", (v: unknown) => typeof v === "string"));
   t.notOk(is("foo", (v: unknown) => typeof v === "number"));
+});
+
+tap.test("function declaration", async (t) => {
+  function isArray(v: unknown): v is Array<any> {
+    return Array.isArray(v);
+  }
+  t.ok(is([], isArray));
+});
+
+tap.test("Array", async (t) => {
+  t.ok(is([], Array));
+  t.ok(is(["abc", 123], Array));
+  t.notOk(is({}, Array));
+});
+
+tap.test("Array.isArray", async (t) => {
+  t.ok(is([], Array.isArray));
+  t.ok(is(["abc", 123], Array.isArray));
+  t.notOk(is({}, Array.isArray));
 });
 
 tap.test("union", async (t) => {

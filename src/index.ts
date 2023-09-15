@@ -36,9 +36,17 @@ export type TypeFromSchema<T> = T extends StringConstructor
 
 /**
  * Type guard to check if a value is a constructor function.
+ *
+ * NOTE: There is no way to tell wether a constructable function is intended
+ * to be called as constructor. This guard therefore checks if the function
+ * name starts with an uppercase letter.
  */
 function isConstructor(fn: unknown): fn is new (...args: any) => any {
-  return typeof fn === "function" && fn.prototype?.constructor === fn;
+  return (
+    typeof fn === "function" &&
+    fn.prototype?.constructor === fn &&
+    fn.name.charAt(0) === fn.name.charAt(0).toUpperCase()
+  );
 }
 
 /**
