@@ -1,5 +1,12 @@
 import tap from "tap";
-import { assert, is, optional, union } from "../index.js";
+import {
+  TypeFromSchema,
+  assert,
+  is,
+  optional,
+  typeGuard,
+  union,
+} from "../index.js";
 
 tap.test("string", async (t) => {
   const s: unknown = "s";
@@ -130,6 +137,13 @@ tap.test("union", async (t) => {
   t.ok(is(a, { foo: union(String, Number) }));
   t.ok(is(b, { foo: union(String, Number) }));
   t.notOk(is(a, { foo: union(Boolean, Number) }));
+  const isStringOrNumber: (v: unknown) => v is string | number = union(
+    String,
+    Number
+  );
+  t.ok(is(23, isStringOrNumber));
+  t.ok(is("hello", isStringOrNumber));
+  t.notOk(is(false, isStringOrNumber));
 });
 
 tap.test("optional", async (t) => {
@@ -139,6 +153,13 @@ tap.test("optional", async (t) => {
   t.ok(is(a, { foo: optional(String) }));
   t.ok(is(b, { foo: optional(String) }));
   t.ok(is(c, { foo: optional(String) }));
+
+  const isStringOrUndefined: (v: unknown) => v is string | undefined =
+    optional(String);
+
+  t.ok(is("hello", isStringOrUndefined));
+  t.ok(is(undefined, isStringOrUndefined));
+  t.notOk(is(23, isStringOrUndefined));
 });
 
 tap.test("literal", async (t) => {
@@ -164,4 +185,34 @@ tap.test("assert", async (t) => {
   t.throws(() => {
     assert(obj, { foo: Number });
   }, TypeError);
+});
+
+tap.test("TypeFromSchema", async (t) => {
+  let s: TypeFromSchema<string> = "foo";
+  //@ts-expect-error
+  s = 23;
+
+  let i: TypeFromSchema<number> = 23;
+  //@ts-expect-error
+  i = "foo";
+
+  const isStringOrNumber = union(String, Number);
+  let x: TypeFromSchema<typeof isStringOrNumber> = 23;
+  x = "foo";
+
+  //@ts-expect-error
+  x = false;
+});
+
+tap.test("typeGuard", async (t) => {
+  const isString = typeGuard(String);
+  t.ok(isString("foo"));
+  t.notOk(isString(23));
+
+  let isNumber: (v: unknown) => v is number;
+  isNumber = typeGuard(Number);
+  t.ok(isNumber(23));
+
+  //@ts-expect-error
+  isNumber = isString;
 });

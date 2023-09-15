@@ -1,3 +1,6 @@
+/**
+ * Runtime type definition.
+ */
 export type Schema =
   | StringConstructor
   | NumberConstructor
@@ -12,6 +15,9 @@ export type Schema =
   | null
   | undefined;
 
+/**
+ * Type to get the actual type from a schema.
+ */
 export type TypeFromSchema<T> = T extends StringConstructor
   ? string
   : T extends NumberConstructor
@@ -28,10 +34,16 @@ export type TypeFromSchema<T> = T extends StringConstructor
   ? R
   : T;
 
+/**
+ * Type guard to check if a value is a constructor function.
+ */
 function isConstructor(fn: unknown): fn is new (...args: any) => any {
   return typeof fn === "function" && fn.prototype?.constructor === fn;
 }
 
+/**
+ * Type guard to check if a value is compatible with a given schema.
+ */
 export function is<const T extends Schema>(
   value: unknown,
   schema: T
@@ -68,14 +80,32 @@ export function is<const T extends Schema>(
   return value === schema;
 }
 
-export function union(...schemas: Schema[]) {
-  return (v: unknown) => schemas.some((schema) => is(v, schema));
+/**
+ * Creates a type guard that checks if a value matches the given schema.
+ */
+export function typeGuard<const T extends Schema>(schema: T) {
+  return (value: unknown): value is TypeFromSchema<T> => is(value, schema);
 }
 
-export function optional(schema: Schema) {
+/**
+ * Creates a type guard that checks if a value matches any of the given schemas.
+ */
+export function union<T extends Schema[]>(...schemas: T) {
+  return (v: unknown): v is TypeFromSchema<T[number]> =>
+    schemas.some((schema) => is(v, schema));
+}
+
+/**
+ * Creates a type guard that checks if a value either matches the given schema or is undefined.
+ */
+export function optional<T extends Schema>(schema: T) {
   return union(schema, undefined);
 }
 
+/**
+ * Asserts that a value matches a given schema.
+ * @throws TypeError if the value does not match the schema.
+ */
 export function assert<T extends Schema>(
   value: unknown,
   schema: T
