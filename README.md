@@ -11,7 +11,7 @@ Super [lightweight](https://bundlephobia.com/package/type-assurance) TypeScript 
 
 ## Example
 
-Lets start with a simple example:
+Let's start with a simple example:
 
 ```ts
 import { assert } from "type-assurance";
