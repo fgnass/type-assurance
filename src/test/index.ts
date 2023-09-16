@@ -112,7 +112,7 @@ tap.test("mixed array", async (t) => {
 
 tap.test("tuple", async (t) => {
   const a: unknown = ["A", 2, new Date()];
-  const matches = is(a, [String, Number, Date] as const);
+  const matches = is(a, [String, Number, Date]);
   if (matches) {
     a[0].charAt(0);
     a[1].toFixed(2);

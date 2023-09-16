@@ -4,17 +4,54 @@
 
 Super [lightweight](https://bundlephobia.com/package/type-assurance) TypeScript library to perform type checks at runtime.
 
-- ✅ Tired of writing long expressions to narrow your types?
-- ✅ You don't want to blow up your bundle size by adding some huge validation library?
-- ✅ Your type checks should be easy to understand by anyone reading your code?
-
-If you've ticked any of the boxes above, take a look at the following example to see what `type-assurance` has to offer:
+- Does only one thing: runtime type checking
+- Provides type guards and type assertions
+- Intuitive schema definition based on language literals
+- 100% test coverage
 
 ## Example
 
-Let's assume we've got some data from a remote source. With the following runtime check we can make sure that the data has the expected shape and at the same time let the TypeScript compiler infer the correct typings:
+Lets start with a simple example:
 
 ```ts
+import { assert } from "type-assurance";
+
+const userSchema = {
+  name: String;
+  email: String;
+};
+
+const user = await api.getUser(23);
+
+// Throw if types don't match
+assert(user, userSchema);
+
+// The compiler now knows the type ...
+console.log(user.name);
+```
+
+We can also infer a static TypeScript type from the runtime schema:
+
+```ts
+import { TypeFromSchema } from "type-assurance";
+
+type User = TypeFromSchema<typeof userSchema>;
+```
+
+This yields the same type as if we had written it by hand:
+
+```ts
+type User = {
+  name: string;
+  email: string;
+};
+```
+
+Sometimes all you need is a quick inline type-check. Use `is` instead of `assert` which acts as a type-guard:
+
+```ts
+import { is } from "type-assurance";
+
 if (
   is(data, {
     body: {
@@ -28,8 +65,8 @@ if (
   })
 ) {
   // We can now be certain that the given data
-  // has the expected shape and the TypeScript
-  // compiler now knows the correct types...
+  // has the expected shape and the compiler
+  // now knows about the types...
 }
 ```
 
@@ -49,6 +86,7 @@ The package exports the following main functions:
 
 - `is(value, schema)` – returns `true` if the value matches the schema. The return type is a [type predicate](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates) that narrows the type down to the one described by the schema.
 - `assert(value, schema)` – throws a `TypeError` if the value does not match the schema. It is an [assertion function](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#assertion-functions) that narrows the type down to the one described by the schema.
+- `typeGuard(schema)` – returns a function that can be used as type guard for the given schema.
 
 The schema that is passed to both these functions looks like an example or blueprint of the expected type. It can be a deeply nested object or just a single value.
 
@@ -69,6 +107,17 @@ This isn't particularly helpful on its own, but it makes sense when used to desc
 To specify objects, use an object where each value is again a schema:
 
 ```ts
+import { typeGuard } from "type-assurance";
+
+const isUser = typeGuard({
+  post: {
+    id: Number,
+    author: {
+      name: String,
+    },
+  },
+});
+
 const data = JSON.parse(`{
   "post": {
     "id": 23,
@@ -78,7 +127,7 @@ const data = JSON.parse(`{
   }
 }`);
 
-if (is(data, { post: { author: { name: String } } })) {
+if (isUser(data)) {
   // data.post.author.name is a string ✅
 }
 ```
@@ -88,28 +137,27 @@ if (is(data, { post: { author: { name: String } } })) {
 You can use constructor functions as schema to check if an object is an instance of that type:
 
 ```ts
-const data: unknown = {
-  now: new Date(),
-  pattern: /2023/,
-}
-
-if (is(data, { now: Date, pattern: RegExp)) {
-  now.toISOString().match(pattern);
-}
+assert(data, {
+  now: Date,
+  pattern: RegExp,
+});
 ```
 
 This also works for classes:
 
 ```ts
-class Foo {
-  bar = 42;
+class Person {
+  constructor(public name: string) {
+  }
 }
 
-const obj: unknown = new Foo();
-
-if (is(obj, Foo)) {
-  // obj.bar is a number
+const data: unknown = {
+  user: new Person("Felix");
 }
+
+if (is(data, { user: Person })) {
+  // data.user is a Person
+};
 ```
 
 > **NOTE**: In the very unlikely case that you want to test for `String`, `Number` or `Boolean` _objects_, you have to use a function instead:
@@ -125,24 +173,19 @@ is(new String("foo"), (s) => s instanceof String); // ✅ true
 To specify an array of a certain type, wrap that type in an array:
 
 ```ts
-const value = JSON.parse(`[1,2,3,4]`);
-if (is(value, [Number])) {
-  // value is of type number[]
-}
+assert(data, [Number]);
+// data is of type number[]
 ```
 
 ### Tuples
 
-For tuples, provide a read-only array of schemas using `as const`:
+For tuples, provide an array with more than one item:
 
 ```ts
-const value = JSON.parse(`[42, "hello", false]`);
-
-if (is(value, [Number, String, Boolean] as const)) {
-  // value[0] is a number
-  // value[1] is a string
-  // value[2] is a boolean
-}
+assert(value, [Number, String, Boolean]);
+// value[0] is a number
+// value[1] is a string
+// value[2] is a boolean
 ```
 
 ### Custom type guards
@@ -150,19 +193,16 @@ if (is(value, [Number, String, Boolean] as const)) {
 You can also use type guard functions as (nested) schemas:
 
 ```ts
-type Person = { name: string; age: number };
-
 /**
- * Type guard to test if the given value is a Person.
+ * Type guard to test if the given value is SomeFancyType.
  */
-function isPerson(v: unknown): v is Person {
-  return is(v, { name: String, age: number });
+function isSomeFancyType(v: unknown): v is SomeFancyType {
+  // custom check goes here ...
 }
 
-assert(family, {
-  mom: isPerson,
-  dad: isPerson,
-  kids: [isPerson],
+assert(data, {
+  id: Number,
+  body: isSomeFancyType,
 });
 ```
 
@@ -171,13 +211,20 @@ assert(family, {
 Finally, specific strings, numbers or boolean values are treated as [literal types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types):
 
 ```ts
-const tasks = JSON.parse(`[
-  { "name": "First", "status": "active" },
-  { "name": "Second", "status": "pending" }
-]`);
+const personSchema = {
+  type: "person",
+  name: String
+} as const;
 
-is(tasks[0], { name: String, status: "pending" }); // ❌ false
-is(tasks[1], { name: String, status: "pending" }); // ✅ true
+const dogSchema = {
+  type: "dog",
+  name: String,
+  breed: String,
+}
+
+if (is(data, dog)) {
+  console.log(data.name "is a cute", data.breed);
+}
 ```
 
 ### Union Types
@@ -185,11 +232,12 @@ is(tasks[1], { name: String, status: "pending" }); // ✅ true
 The package exports a `union` function to check if a value is of either of the given types:
 
 ```ts
-import { assert, union } from "type-assurance";
+import { union } from "type-assurance";
 
-assert(task, { status: union("pending", "active", "done") });
-
-assert(person, { age: union(Number, null))});
+const taskSchema = {
+  title: String,
+  status: union("pending", "active", "done"),
+};
 ```
 
 ### Optional properties
@@ -197,14 +245,12 @@ assert(person, { age: union(Number, null))});
 You can use the `optional` helper for properties that aren't required:
 
 ```ts
-import { assert, optional } from "type-assurance";
+import { optional } from "type-assurance";
 
-const person = { name: "Felix" };
-
-assert(person, {
-  name: String,
-  address: optional(String),
-});
+const personSchema = {
+  name: String
+  address: optional(String)
+};
 ```
 
 > **Note**
