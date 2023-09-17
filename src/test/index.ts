@@ -2,6 +2,7 @@ import tap from "tap";
 import {
   TypeFromSchema,
   assert,
+  diff,
   is,
   optional,
   typeGuard,
@@ -119,6 +120,7 @@ tap.test("tuple", async (t) => {
     a[2].getTime();
   }
   t.ok(matches);
+  t.notOk(is(a, [String, Number, String]));
 });
 
 tap.test("unsupported schema", async (t) => {

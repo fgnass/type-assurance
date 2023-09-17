@@ -56,36 +56,51 @@ export function is<const T extends Schema>(
   value: unknown,
   schema: T
 ): value is TypeFromSchema<T> {
-  if (schema === String) return typeof value === "string";
-  if (schema === Number) return typeof value === "number";
-  if (schema === Boolean) return typeof value === "boolean";
+  return diff(value, schema).length === 0;
+}
+
+/**
+ * Compares a value to a schema and returns all property paths
+ * where the data does not match the specified type.
+ */
+export function diff<const T extends Schema>(
+  value: unknown,
+  schema: T,
+  path = "value"
+): Array<string> {
+  const t = (v: boolean) => (v ? [] : [path]);
+  if (schema === String) return t(typeof value === "string");
+  if (schema === Number) return t(typeof value === "number");
+  if (schema === Boolean) return t(typeof value === "boolean");
   if (Array.isArray(schema)) {
-    if (!Array.isArray(value)) return false;
-    if (!schema.length) return true;
+    if (!Array.isArray(value)) return t(false);
+    if (!schema.length) return t(true);
     if (schema.length > 1) {
       // tuple
-      return (
-        value.length === schema.length &&
-        value.every((v, i) => is(v, schema[i]))
+      const mismatch = value.flatMap((v, i) =>
+        diff(v, schema[i], `${path}[${i}]`)
       );
+      if (mismatch.length) return mismatch;
+      return t(value.length === schema.length);
     } else {
-      return value.every((v) => is(v, schema[0]));
+      return value.flatMap((v, i) => diff(v, schema[0], `${path}[${i}]`));
     }
   }
   if (typeof schema === "object" && schema) {
-    if (!value || typeof value !== "object") return false;
-    // @ts-ignore
-    return Object.keys(schema).every((k) => is(value[k], schema[k]));
+    if (!value || typeof value !== "object") return t(false);
+    return Object.keys(schema).flatMap((k) =>
+      //@ts-ignore
+      diff(value[k], schema[k], `${path}.${k}`)
+    );
   }
   if (typeof schema === "function") {
     if (isConstructor(schema)) {
-      return value instanceof schema;
+      return t(value instanceof schema);
     } else {
-      return schema(value);
+      return t(schema(value));
     }
   }
-
-  return value === schema;
+  return t(value === schema);
 }
 
 /**
@@ -118,7 +133,8 @@ export function assert<T extends Schema>(
   value: unknown,
   schema: T
 ): asserts value is TypeFromSchema<T> {
-  if (!is(value, schema)) {
-    throw new TypeError();
+  const mismatch = diff(value, schema);
+  if (mismatch.length) {
+    throw new TypeError(`${mismatch[0]} does not match the schema.`);
   }
 }
