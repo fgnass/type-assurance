@@ -126,6 +126,14 @@ export function optional<T extends Schema>(schema: T) {
 }
 
 /**
+ * Type guard that always returns `true`. Can be used to create schemas
+ * where the type of a property does not matter.
+ */
+export function unknown(v: unknown): v is unknown {
+  return true;
+}
+
+/**
  * Asserts that a value matches a given schema.
  * @throws TypeError if the value does not match the schema.
  */
