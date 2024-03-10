@@ -235,13 +235,17 @@ tap.test("TypeFromSchema", async (t) => {
   x = false;
 
   const fooSchema = {
-    required: String,
+    required: {
+      value: String,
+    },
     optional: optional(String),
   } as const;
 
   type Foo = TypeFromSchema<typeof fooSchema>;
   let foo: Foo = {
-    required: "",
+    required: {
+      value: "",
+    },
   };
   foo.optional = "foo";
 
@@ -267,4 +271,33 @@ tap.test("diff", async (t) => {
   t.match(diff({ num: "aaa", val: "bbb" }, { num: Number, val: String }), [
     "value.num",
   ]);
+});
+
+tap.test("deeply nested schemas", async (t) => {
+  const schema = {
+    level1: optional({
+      level2: {
+        level3: {
+          level4: {
+            level5: {
+              level6: {
+                level7: {
+                  level8: {
+                    level9: {
+                      level10: {
+                        value: String,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  };
+  type S = TypeFromSchema<typeof schema>;
+  const value: S = {};
+  t.ok(is(value, schema));
 });

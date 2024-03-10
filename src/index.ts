@@ -32,7 +32,7 @@ export type TypeFromSchema<T> = T extends StringConstructor
   : T extends ReadonlyArray<Schema>
   ? { [P in keyof T]: TypeFromSchema<T[P]> }
   : T extends { [key: string]: Schema }
-  ? TypeFromNestedSchema<OptionalProps<T> & RequiredProps<T>>
+  ? Expand<OptionalProps<T> & RequiredProps<T>>
   : T extends new (...args: any) => infer R
   ? R
   : T extends (v: unknown) => v is infer R
@@ -40,24 +40,27 @@ export type TypeFromSchema<T> = T extends StringConstructor
   : T;
 
 /**
- * Type to get nested types from a schema object.
+ * Recursively expand mapped types for better readability.
+ * See https://github.com/microsoft/TypeScript/issues/47980
  */
-type TypeFromNestedSchema<T> = {
-  -readonly [K in keyof T]: TypeFromSchema<T[K]>;
-};
+type Expand<T> = T extends unknown ? { [K in keyof T]: Expand<T[K]> } : never;
 
 /**
  * Extract only the optional props of a schema.
  */
 type OptionalProps<T> = {
-  [P in keyof T as T[P] extends { [OPTIONAL]: true } ? P : never]?: T[P];
+  -readonly [K in keyof T as T[K] extends { [OPTIONAL]: true }
+    ? K
+    : never]?: TypeFromSchema<T[K]>;
 };
 
 /**
  * Extract only the required props of a schema.
  */
 type RequiredProps<T> = {
-  [P in keyof T as T[P] extends { [OPTIONAL]: true } ? never : P]: T[P];
+  -readonly [K in keyof T as T[K] extends { [OPTIONAL]: true }
+    ? never
+    : K]: TypeFromSchema<T[K]>;
 };
 
 /**
