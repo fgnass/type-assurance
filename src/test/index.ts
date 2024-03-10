@@ -7,6 +7,7 @@ import {
   optional,
   typeGuard,
   union,
+  unknown,
 } from "../index.js";
 
 tap.test("string", async (t) => {
@@ -152,6 +153,15 @@ tap.test("Array.isArray", async (t) => {
   t.notOk(is({}, Array.isArray));
 });
 
+tap.test("unknown", async (t) => {
+  t.ok(is(23, unknown));
+  t.ok(is("abc", unknown));
+  t.ok(is([], unknown));
+  t.ok(is({}, unknown));
+  t.ok(is(undefined, unknown));
+  t.ok(is(null, unknown));
+});
+
 tap.test("union", async (t) => {
   const a: unknown = { foo: "bar" };
   const b: unknown = { foo: 42 };
@@ -223,6 +233,20 @@ tap.test("TypeFromSchema", async (t) => {
 
   //@ts-expect-error
   x = false;
+
+  const fooSchema = {
+    required: String,
+    optional: optional(String),
+  } as const;
+
+  type Foo = TypeFromSchema<typeof fooSchema>;
+  let foo: Foo = {
+    required: "",
+  };
+  foo.optional = "foo";
+
+  //@ts-expect-error
+  foo.optional = 23;
 });
 
 tap.test("typeGuard", async (t) => {
@@ -236,4 +260,11 @@ tap.test("typeGuard", async (t) => {
 
   //@ts-expect-error
   isNumber = isString;
+});
+
+tap.test("diff", async (t) => {
+  t.match(diff("abc", Number), ["value"]);
+  t.match(diff({ num: "aaa", val: "bbb" }, { num: Number, val: String }), [
+    "value.num",
+  ]);
 });

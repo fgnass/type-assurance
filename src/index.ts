@@ -1,4 +1,9 @@
 /**
+ * Symbol to mark properties as optional.
+ */
+const OPTIONAL = Symbol("optional");
+
+/**
  * Runtime type definition.
  */
 export type Schema =
@@ -27,12 +32,33 @@ export type TypeFromSchema<T> = T extends StringConstructor
   : T extends ReadonlyArray<Schema>
   ? { [P in keyof T]: TypeFromSchema<T[P]> }
   : T extends { [key: string]: Schema }
-  ? { -readonly [P in keyof T]: TypeFromSchema<T[P]> }
+  ? TypeFromNestedSchema<OptionalProps<T> & RequiredProps<T>>
   : T extends new (...args: any) => infer R
   ? R
   : T extends (v: unknown) => v is infer R
   ? R
   : T;
+
+/**
+ * Type to get nested types from a schema object.
+ */
+type TypeFromNestedSchema<T> = {
+  -readonly [K in keyof T]: TypeFromSchema<T[K]>;
+};
+
+/**
+ * Extract only the optional props of a schema.
+ */
+type OptionalProps<T> = {
+  [P in keyof T as T[P] extends { [OPTIONAL]: true } ? P : never]?: T[P];
+};
+
+/**
+ * Extract only the required props of a schema.
+ */
+type RequiredProps<T> = {
+  [P in keyof T as T[P] extends { [OPTIONAL]: true } ? never : P]: T[P];
+};
 
 /**
  * Type guard to check if a value is a constructor function.
@@ -120,9 +146,13 @@ export function union<T extends Schema[]>(...schemas: T) {
 
 /**
  * Creates a type guard that checks if a value either matches the given schema or is undefined.
+ * The returned function is marked with the `OPTIONAL` symbol – when used as value inside an
+ * object, the property will become optional.
  */
 export function optional<T extends Schema>(schema: T) {
-  return union(schema, undefined);
+  const guard = union(schema, undefined);
+  (guard as any).optional = true;
+  return guard as typeof guard & { [OPTIONAL]: true };
 }
 
 /**

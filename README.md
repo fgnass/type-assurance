@@ -253,9 +253,6 @@ const personSchema = {
 };
 ```
 
-> **Note**
-> The `optional(schema)` helper is short for `union(schema, undefined)`;
-
 ### Infer the type from a schema
 
 You can convert a runtime schema into a static type:
