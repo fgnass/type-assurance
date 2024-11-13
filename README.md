@@ -1,6 +1,6 @@
 # 🛡️ type-assurance
 
-![npm bundle size](https://deno.bundlejs.com/badge?q=type-assurance@1.2.0)
+![npm bundle size](https://deno.bundlejs.com/badge?q=type-assurance)
 
 Super [lightweight](https://bundlephobia.com/package/type-assurance) TypeScript library to perform type checks at runtime.
 
