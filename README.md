@@ -227,6 +227,15 @@ if (is(data, dog)) {
 }
 ```
 
+### Record Types
+
+It's also possible to use `record` passing the type for the key and value:
+
+```ts
+assert(value, record(String, String));
+// value.foo is a string
+```
+
 ### Union Types
 
 The package exports a `union` function to check if a value is of either of the given types:
