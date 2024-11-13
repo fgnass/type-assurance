@@ -5,6 +5,7 @@ import {
   diff,
   is,
   optional,
+  record,
   typeGuard,
   union,
   unknown,
@@ -300,4 +301,12 @@ tap.test("deeply nested schemas", async (t) => {
   type S = TypeFromSchema<typeof schema>;
   const value: S = {};
   t.ok(is(value, schema));
+});
+
+tap.test("record", async (t) => {
+  const obj: unknown = { foo: "foo" };
+  assert(obj, record(String, String));
+  t.throws(() => {
+    assert(obj, record(String, Number));
+  }, TypeError);
 });

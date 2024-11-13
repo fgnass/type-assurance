@@ -179,3 +179,23 @@ export function assert<T extends Schema>(
     throw new TypeError(`${mismatch[0]} does not match the schema.`);
   }
 }
+
+/**
+ *  Valid Record keys
+ */
+export type RecordKeys =
+  | StringConstructor
+  | NumberConstructor
+  | string
+  | number
+
+/**
+ * Creates a type guard that checks if a value matches a given Record<K, V>.
+ */
+export function record<const K extends RecordKeys, const V extends Schema>(key: K, value: V) {
+  return (v: unknown): v is Record<TypeFromSchema<K>, TypeFromSchema<V>> =>
+    typeof v === 'object' 
+    && v !== null 
+    && Object.values(v).every((y) => is(y, value)) 
+    && Object.keys(v).every((y) => is(y, key))
+}
