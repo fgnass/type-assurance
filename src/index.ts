@@ -26,18 +26,18 @@ export type Schema =
 export type TypeFromSchema<T> = T extends StringConstructor
   ? string
   : T extends NumberConstructor
-  ? number
-  : T extends BooleanConstructor
-  ? boolean
-  : T extends ReadonlyArray<Schema>
-  ? { [P in keyof T]: TypeFromSchema<T[P]> }
-  : T extends { [key: string]: Schema }
-  ? Expand<OptionalProps<T> & RequiredProps<T>>
-  : T extends new (...args: any) => infer R
-  ? R
-  : T extends (v: unknown) => v is infer R
-  ? R
-  : T;
+    ? number
+    : T extends BooleanConstructor
+      ? boolean
+      : T extends ReadonlyArray<Schema>
+        ? { [P in keyof T]: TypeFromSchema<T[P]> }
+        : T extends { [key: string]: Schema }
+          ? Expand<OptionalProps<T> & RequiredProps<T>>
+          : T extends new (...args: any) => infer R
+            ? R
+            : T extends (v: unknown) => v is infer R
+              ? R
+              : T;
 
 /**
  * Recursively expand mapped types for better readability.
@@ -187,15 +187,18 @@ export type RecordKeys =
   | StringConstructor
   | NumberConstructor
   | string
-  | number
+  | number;
 
 /**
  * Creates a type guard that checks if a value matches a given Record<K, V>.
  */
-export function record<const K extends RecordKeys, const V extends Schema>(key: K, value: V) {
+export function record<const K extends RecordKeys, const V extends Schema>(
+  key: K,
+  value: V
+) {
   return (v: unknown): v is Record<TypeFromSchema<K>, TypeFromSchema<V>> =>
-    typeof v === 'object' 
-    && v !== null 
-    && Object.values(v).every((y) => is(y, value)) 
-    && Object.keys(v).every((y) => is(y, key))
+    typeof v === "object" &&
+    v !== null &&
+    Object.values(v).every((y) => is(y, value)) &&
+    Object.keys(v).every((y) => is(y, key));
 }
