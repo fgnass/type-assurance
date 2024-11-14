@@ -1,7 +1,7 @@
 /**
- * Symbol to mark properties as optional.
+ * Marker for optional properties.
  */
-const OPTIONAL = Symbol("optional");
+const OPTIONAL = "type-assurance:optional" as const;
 
 /**
  * Runtime type definition.
@@ -149,7 +149,7 @@ export function union<T extends Schema[]>(...schemas: T) {
 
 /**
  * Creates a type guard that checks if a value either matches the given schema or is undefined.
- * The returned function is marked with the `OPTIONAL` symbol – when used as value inside an
+ * The returned function is marked with the `type-assurance:optional` marker – when used as value inside an
  * object, the property will become optional.
  */
 export function optional<T extends Schema>(schema: T) {
