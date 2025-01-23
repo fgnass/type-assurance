@@ -310,3 +310,37 @@ tap.test("record", async (t) => {
     assert(obj, record(String, Number));
   }, TypeError);
 });
+
+tap.test("nested record", async (t) => {
+  // Define schemas
+  const recordSchema = record(String, unknown);
+  type UnknownRecord = TypeFromSchema<typeof recordSchema>;
+
+  const TestSchema = {
+    record: recordSchema,
+  };
+  type Test = TypeFromSchema<typeof TestSchema>;
+
+  // Test empty record
+  const s: UnknownRecord = {};
+  t.ok(is(s, recordSchema), "empty record should be valid");
+
+  // Test nested record in object
+  const test: Test = {
+    record: s,
+  };
+  t.ok(is(test, TestSchema), "object with record should be valid");
+
+  // Test with actual data
+  const populatedTest: Test = {
+    record: {
+      key1: "string",
+      key2: 42,
+      key3: { nested: true },
+    },
+  };
+  t.ok(
+    is(populatedTest, TestSchema),
+    "object with populated record should be valid"
+  );
+});

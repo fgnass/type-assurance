@@ -26,24 +26,24 @@ export type Schema =
 export type TypeFromSchema<T> = T extends StringConstructor
   ? string
   : T extends NumberConstructor
-    ? number
-    : T extends BooleanConstructor
-      ? boolean
-      : T extends ReadonlyArray<Schema>
-        ? { [P in keyof T]: TypeFromSchema<T[P]> }
-        : T extends { [key: string]: Schema }
-          ? Expand<OptionalProps<T> & RequiredProps<T>>
-          : T extends new (...args: any) => infer R
-            ? R
-            : T extends (v: unknown) => v is infer R
-              ? R
-              : T;
+  ? number
+  : T extends BooleanConstructor
+  ? boolean
+  : T extends ReadonlyArray<Schema>
+  ? { [P in keyof T]: TypeFromSchema<T[P]> }
+  : T extends { [key: string]: Schema }
+  ? Expand<OptionalProps<T> & RequiredProps<T>>
+  : T extends new (...args: any) => infer R
+  ? R
+  : T extends (v: unknown) => v is infer R
+  ? R
+  : T;
 
 /**
- * Recursively expand mapped types for better readability.
+ * Expand mapped types for better readability.
  * See https://github.com/microsoft/TypeScript/issues/47980
  */
-type Expand<T> = T extends unknown ? { [K in keyof T]: Expand<T[K]> } : never;
+type Expand<T> = T extends unknown ? { [K in keyof T]: T[K] } : never;
 
 /**
  * Extract only the optional props of a schema.
