@@ -22,9 +22,8 @@
   "repository": "fgnass/type-assurance",
   "license": "MIT",
   "devDependencies": {
-    "@types/tap": "^15.0.12",
     "tap": "^21.0.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.3"
   },
   "sideEffects": false
 }
